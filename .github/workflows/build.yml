@@ -36,7 +36,7 @@ jobs:
         with:
           push: true
           platforms: linux/${{ matrix.arch }}
-          tags: powerivq/dnstt:latest-${{ matrix.arch }}
+          tags: powerivq/slipstream:latest-${{ matrix.arch }}
 
   manifest:
     needs: build
@@ -50,6 +50,6 @@ jobs:
 
       - name: Create and push manifest
         run: |
-          docker buildx imagetools create -t powerivq/dnstt:latest \
-            powerivq/dnstt:latest-amd64 \
-            powerivq/dnstt:latest-arm64
+          docker buildx imagetools create -t powerivq/slipstream:latest \
+            powerivq/slipstream:latest-amd64 \
+            powerivq/slipstream:latest-arm64
