@@ -46,14 +46,15 @@ docker-build-multiarch: ## Build and push multi-architecture images (amd64 and a
 
 docker-build-multiarch-local: ## Build multi-architecture images locally without pushing
 	@echo "Building multi-architecture images for platforms: $(PLATFORMS)"
+	@echo "Note: Multi-platform builds cannot be loaded into local Docker. Building without load."
 	docker buildx build --platform $(PLATFORMS) \
 		--target server \
 		-t $(SERVER_IMAGE) \
-		--load .
+		--output type=image .
 	docker buildx build --platform $(PLATFORMS) \
 		--target client \
 		-t $(CLIENT_IMAGE) \
-		--load .
+		--output type=image .
 
 docker-push: ## Push Docker images to registry
 	docker push $(SERVER_IMAGE)

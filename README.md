@@ -84,7 +84,7 @@ docker-compose down
 
 Using Docker:
 ```bash
-docker run -p 5300:5300/udp dnstt-server:latest -domain example.com
+docker run -p 5300:5300/udp dnstt-server:latest -domain example.com -udp :5300
 ```
 
 Using binary:
@@ -96,7 +96,7 @@ Using binary:
 
 Using Docker:
 ```bash
-docker run -p 7000:7000 dnstt-client:latest -domain example.com
+docker run -p 7000:7000 dnstt-client:latest -domain example.com -listen 0.0.0.0:7000
 ```
 
 Using binary:
