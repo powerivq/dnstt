@@ -36,7 +36,7 @@ jobs:
         with:
           push: true
           platforms: linux/${{ matrix.arch }}
-          tags: powerivq/ttrss:latest-${{ matrix.arch }}
+          tags: powerivq/dnstt:latest-${{ matrix.arch }}
 
   manifest:
     needs: build
