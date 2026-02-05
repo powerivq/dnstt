@@ -1,29 +1,39 @@
-FROM golang:alpine AS build
+FROM debian:bookworm AS build
 
 WORKDIR /tmp
 
-RUN apk add --no-cache ca-certificates git upx
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        clang \
+        cmake \
+        git \
+        meson \
+        ninja-build \
+        pkg-config \
+        python3 \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN git clone -c advice.detachedHead=false --branch master --single-branch \
-    https://repo.or.cz/dnstt.git src/dnstt \
-    && cd src/dnstt \
-    && go mod download \
-    && CGO_ENABLED=0 GOOS=linux go build -o /tmp/bin/dnstt-server \
-    -trimpath -ldflags "-s -w -buildid=" ./dnstt-server \
-    && upx --ultra-brute --lzma /tmp/bin/dnstt-server
+RUN git clone --recurse-submodules https://github.com/EndPositive/slipstream.git src/slipstream
 
-RUN mkdir -p ./etc \
-    && echo "dnstt:x:7000:7000::/nonexistent:/sbin/nologin" >> ./etc/passwd \
-    && echo "dnstt:!:::::::" >> ./etc/shadow \
-    && echo "dnstt:x:7000:" >> ./etc/group \
-    && echo "dnstt:!::" >> ./etc/groupshadow \
-    && chmod 0400 ./etc/shadow ./etc/groupshadow
+WORKDIR /tmp/src/slipstream
 
-FROM alpine AS final
+RUN meson setup --buildtype=release -Db_lto=true --warnlevel=0 build \
+    && meson compile -C build
 
-COPY --from=build /tmp/etc/* /etc/
-COPY --from=build --chown=dnstt --chmod=755 /tmp/bin/dnstt-server /bin/dnstt-server
+FROM debian:bookworm-slim AS final
 
-USER dnstt
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libssl3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 7000 --home /nonexistent --shell /usr/sbin/nologin slipstream
 
-ENTRYPOINT ["/bin/dnstt-server"]
+COPY --from=build --chown=slipstream --chmod=755 \
+    /tmp/src/slipstream/build/slipstream-client /usr/local/bin/slipstream-client
+COPY --from=build --chown=slipstream --chmod=755 \
+    /tmp/src/slipstream/build/slipstream-server /usr/local/bin/slipstream-server
+
+USER slipstream
+
+ENTRYPOINT ["/usr/local/bin/slipstream-server"]
