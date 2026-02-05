@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # DNS Tunnel Server
+  dnstt-server:
+    build:
+      context: .
+      target: server
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: dnstt-server:latest
+    container_name: dnstt-server
+    ports:
+      - "5300:5300/udp"
+    command:
+      - "-domain"
+      - "t.example.com"
+      - "-udp"
+      - ":5300"
+      - "-forward"
+      - "127.0.0.1:8000"
+    restart: unless-stopped
+    networks:
+      - dnstt-net
+
+  # DNS Tunnel Client
+  dnstt-client:
+    build:
+      context: .
+      target: client
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: dnstt-client:latest
+    container_name: dnstt-client
+    ports:
+      - "7000:7000"
+    command:
+      - "-domain"
+      - "t.example.com"
+      - "-listen"
+      - "0.0.0.0:7000"
+    restart: unless-stopped
+    networks:
+      - dnstt-net
+
+networks:
+  dnstt-net:
+    driver: bridge

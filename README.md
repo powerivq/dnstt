@@ -65,6 +65,21 @@ make setup-buildx
 
 ## Running
 
+### Using Docker Compose
+
+The easiest way to run both server and client:
+
+```bash
+# Edit docker-compose.yml to configure your domain
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
 ### Server
 
 Using Docker:
@@ -109,6 +124,27 @@ Build for specific platform:
 ```bash
 PLATFORMS=linux/arm64 ./build-docker.sh
 ```
+
+## CI/CD Integration
+
+The repository includes a GitHub Actions workflow (`.github/workflows/docker-build.yml`) that automatically:
+- Builds multi-architecture Docker images for both arm64 and amd64
+- Pushes images to GitHub Container Registry (ghcr.io)
+- Tags images based on branch, PR, or semantic version
+- Runs on every push to main/master branches or on tags
+
+To use it:
+1. Enable GitHub Actions in your repository
+2. Images will be published to `ghcr.io/OWNER/REPO-server:TAG` and `ghcr.io/OWNER/REPO-client:TAG`
+
+## Docker Image Details
+
+### Architecture Support
+- **amd64** (x86_64): Intel/AMD 64-bit processors
+- **arm64** (aarch64): ARM 64-bit processors (Raspberry Pi 4, Apple Silicon, AWS Graviton, etc.)
+
+### Image Size
+Both server and client images are approximately **1.88MB** each, built using multi-stage builds with a scratch base for minimal footprint.
 
 ## Makefile Targets
 
