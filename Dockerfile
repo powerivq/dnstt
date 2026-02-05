@@ -2,12 +2,10 @@ FROM golang:alpine AS build
 
 WORKDIR /tmp
 
-ARG TAG
-
 RUN apk add --no-cache ca-certificates git upx
 
-RUN git clone -c advice.detachedHead=false --branch ${TAG} \
-    --single-branch https://repo.or.cz/dnstt.git src/dnstt \
+RUN git clone -c advice.detachedHead=false --branch master --single-branch \
+    https://repo.or.cz/dnstt.git src/dnstt \
     && cd src/dnstt \
     && go mod download \
     && CGO_ENABLED=0 GOOS=linux go build -o /tmp/bin/dnstt-server \
